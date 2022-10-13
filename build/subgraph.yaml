@@ -1,0 +1,59 @@
+specVersion: 0.0.4
+schema:
+  file: schema.graphql
+features:
+  - ipfsOnEthereumContracts
+dataSources:
+  - kind: ethereum/contract
+    name: CrowdSourcingFactory
+    network: goerli
+    source:
+      address: "0xeB1F85B8bc1694Dc74789A744078D358cb88117f"
+      abi: CrowdSourcingFactory
+      startBlock: 7763910
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - CampaignCreator
+        - Campaign
+        - Milestone
+        - Donors
+      abis:
+        - name: CrowdSourcingFactory
+          file: CrowdSourcingFactory\abis\CrowdSourcingFactory.json
+      eventHandlers:
+        - event: newCrowdFundingCreated(indexed address,uint256,address,string)
+          handler: handlenewCrowdFundingCreated
+      file: CrowdSourcingFactory\CrowdSourcingFactory.wasm
+templates:
+  - kind: ethereum/contract
+    name: CrowdFundingContract
+    network: goerli
+    source:
+      abi: CrowdFundingContract
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      file: CrowdSourcingFactory\CrowdSourcingFactory.wasm
+      entities:
+        - CampaignCreator
+        - Campaign
+        - Milestone
+        - Donors
+      abis:
+        - name: CrowdFundingContract
+          file: CrowdFundingContract\abis\CrowdFundingContract.json
+        - name: CrowdSourcingFactory
+          file: CrowdFundingContract\abis\CrowdSourcingFactory.json
+      eventHandlers:
+        - event: fundsDonated(indexed address,uint256,uint256)
+          handler: handleFundsDonated
+        - event: fundsWithdrawn(indexed address,uint256,uint256)
+          handler: handleFundsWithdrawn
+        - event: milestoneCreated(indexed address,uint256,uint256,string)
+          handler: handleMilestoneCreated
+        - event: milestoneRejected(uint256,uint256)
+          handler: handleMilestoneRejected
